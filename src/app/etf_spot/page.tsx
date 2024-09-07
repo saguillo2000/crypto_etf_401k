@@ -22,13 +22,43 @@ const VerificationSuccess: React.FC = () => {
     }
   };
 
-  const calculateWeights = () => {
-    const totalCoins = coinWeights.length;
-    const updatedCoinWeights = coinWeights.map(item => ({
-      ...item,
-      weight: isUniform ? 1 / totalCoins : Math.random() // Replace Math.random() with actual marketcap logic
-    }));
-    setCoinWeights(updatedCoinWeights);
+  const calculateWeights = async () => {
+    if (isUniform) {
+      const totalCoins = coinWeights.length;
+      const updatedCoinWeights = coinWeights.map(item => ({
+        ...item,
+        weight: parseFloat((1 / totalCoins).toFixed(3)), // Ensure weight has 3 decimals
+      }));
+      setCoinWeights(updatedCoinWeights);
+    } else {
+      const symbols = coinWeights.map(item => item.coin);
+      console.log('Symbols for POST request:', { symbols }); // Log the symbols array
+
+      try {
+        const response = await fetch('http://127.0.0.1:8003/compute_market_caps_weights/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ symbols }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch market cap weights');
+        }
+
+        const data = await response.json();
+        console.log('API response:', data); // Log the API response
+
+        const updatedCoinWeights = coinWeights.map(item => ({
+          ...item,
+          weight: parseFloat((data[item.coin] || 0).toFixed(3)), // Ensure weight has 3 decimals
+        }));
+        setCoinWeights(updatedCoinWeights);
+      } catch (error) {
+        console.error('Error calculating weights:', error);
+      }
+    }
   };
 
   const handleChatSubmit = async () => {
@@ -104,7 +134,7 @@ const VerificationSuccess: React.FC = () => {
             {coinWeights.map((item, index) => (
               <tr key={index} className={index % 2 === 0 ? 'bg-blue-100' : 'bg-blue-200'}>
                 <td className="border px-4 py-2">{item.coin}</td>
-                <td className="border px-4 py-2">{item.weight.toFixed(2)}</td>
+                <td className="border px-4 py-2">{item.weight.toFixed(3)}</td>
               </tr>
             ))}
           </tbody>

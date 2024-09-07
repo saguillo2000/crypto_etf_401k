@@ -153,5 +153,5 @@ symbol_list = ['BTC', 'ETH', 'UNI', 'LINK']  # Example list of symbol
 
 
 
-market_caps_df = compute_market_caps_weights(symbol_list, alcconn)
-print(market_caps_df)
+# market_caps_df = compute_market_caps_weights(symbol_list, alcconn)
+# print(market_caps_df)

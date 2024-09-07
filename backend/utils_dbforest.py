@@ -284,8 +284,8 @@ def insert_historical_data(conn, ):
     finally:
         cursor.close()  # Close the cursor
 
-conn = get_connection()
-insert_historical_data(conn)
+# conn = get_connection()
+# insert_historical_data(conn)
 
 #create_redstone_price_table()
 #create_historical_data_table()

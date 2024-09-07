@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import json
 from sqlalchemy import create_engine
 from utils_dbforest import get_sqlalchemy_engine  # Assuming this is in your utils_dbforest.py
@@ -8,6 +9,14 @@ from calculation import compute_market_caps_weights
 # Initialize FastAPI app
 app = FastAPI()
 engine = get_sqlalchemy_engine()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allow requests from this origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Input model
 class MarketCapRequest(BaseModel):
