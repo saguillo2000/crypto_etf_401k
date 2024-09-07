@@ -27,34 +27,34 @@ contract Prompt is AIOracleCallbackReceiver {
         bytes output;
     }
 
-    address owner;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner");
-        _;
-    }
+    uint256 public modelId = 11;
 
     mapping(uint256 => AIOracleRequest) public requests;
 
     mapping(uint256 => uint64) public callbackGasLimit;
 
+    mapping(uint256 => string) public latestPrompts;
+    mapping(uint256 => string) public latestResponses;
+
+    function getLatestPrompt() external view returns (string memory) {
+        return latestPrompts[modelId];
+    }
+
+    function getLatestResponse() external view returns (string memory) {
+        return latestResponses[modelId];
+    }
+
     constructor(IAIOracle _aiOracle) AIOracleCallbackReceiver(_aiOracle) {
-        owner = msg.sender;
-        callbackGasLimit[50] = 500_000; // Stable-Diffusion
         callbackGasLimit[11] = 5_000_000; // Llama
     }
 
-    function setCallbackGasLimit(
-        uint256 modelId,
-        uint64 gasLimit
-    ) external onlyOwner {
+    function setCallbackGasLimit(uint64 gasLimit) external {
         callbackGasLimit[modelId] = gasLimit;
     }
 
     mapping(uint256 => mapping(string => string)) public prompts;
 
     function getAIResult(
-        uint256 modelId,
         string calldata prompt
     ) external view returns (string memory) {
         return prompts[modelId][prompt];
@@ -69,6 +69,8 @@ contract Prompt is AIOracleCallbackReceiver {
         require(request.sender != address(0), "request does not exist");
         request.output = output;
         prompts[request.modelId][string(request.input)] = string(output);
+        latestPrompts[request.modelId] = string(request.input);
+        latestResponses[request.modelId] = string(output);
         emit promptsUpdated(
             requestId,
             request.modelId,
@@ -78,14 +80,11 @@ contract Prompt is AIOracleCallbackReceiver {
         );
     }
 
-    function estimateFee(uint256 modelId) public view returns (uint256) {
+    function estimateFee() public view returns (uint256) {
         return aiOracle.estimateFee(modelId, callbackGasLimit[modelId]);
     }
 
-    function calculateAIResult(
-        uint256 modelId,
-        string calldata prompt
-    ) external payable {
+    function calculateAIResult(string calldata prompt) external payable {
         bytes memory input = bytes(prompt);
         bytes memory callbackData = bytes("");
         address callbackAddress = address(this);
