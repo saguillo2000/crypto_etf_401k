@@ -7,14 +7,15 @@ from web3 import Web3
 load_dotenv()
 
 # Connect to an Ethereum node
-w3 = Web3(Web3.HTTPProvider(os.getenv('SEPOLIA_URL_RPC')))
+w3 = Web3(Web3.HTTPProvider(os.getenv('SEPOLIA_URL_RPC'))) # OP_SEPOLIA_URL_RPC
 
 # Load contract ABI
 with open('ora_prompt_abi.json', 'r') as f:
     contract_abi = json.load(f)
 
 # Contract address (replace with your deployed contract address)
-contract_address = '0x11d01fa0f5dDf1bd7A75583Bf5CcdA6D8c548efE'
+contract_address = '0x11d01fa0f5dDf1bd7A75583Bf5CcdA6D8c548efE' # ETH sepolia
+#contract_address = '0x1284786a8b79D1D2cd4ca7Cd4DfD8a441B8CE820' # OP sepolia
 
 # Create contract instance
 contract = w3.eth.contract(address=contract_address, abi=contract_abi)

@@ -12,13 +12,15 @@ wallet_data = get_wallet_data(os.getenv('PUBLIC_KEY'), os.getenv('OP_MAINNET_URL
 print(wallet_data)
 
 # Connect to an Ethereum node (replace with your node URL)
-w3 = Web3(Web3.HTTPProvider(os.getenv('SEPOLIA_URL_RPC')))
+w3 = Web3(Web3.HTTPProvider(os.getenv('SEPOLIA_URL_RPC'))) # OP_SEPOLIA_URL_RPC
 
 with open('ora_summary_abi.json', 'r') as f:
     contract_abi = json.load(f)
 
 # Contract address and ABI (you'll need to replace these)
-contract_address = '0xce247664E8D0715B0512B6242D1d96e0E3169Ceb'
+contract_address = '0xce247664E8D0715B0512B6242D1d96e0E3169Ceb' # ETH sepolia
+#contract_address = '0x92410D28EAdD7fFe0e6cA8CD39d81f3022eC9141' # OP sepolia
+
 # Create contract instance
 contract = w3.eth.contract(address=contract_address, abi=contract_abi)
 
