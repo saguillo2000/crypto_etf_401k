@@ -15,7 +15,7 @@ interface IVerifyRequest {
     nullifier_hash: string;
     merkle_root: string;
     proof: string;
-    verification_level: VerificationLevel;
+    verification_level: VerificationLevel.Device;
   };
   signal?: string;
 }
