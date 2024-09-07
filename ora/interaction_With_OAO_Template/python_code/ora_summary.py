@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from dotenv import load_dotenv
 from web3 import Web3
 
@@ -17,7 +18,6 @@ with open('ora_summary_abi.json', 'r') as f:
     contract_abi = json.load(f)
 
 # Contract address and ABI (you'll need to replace these)
-#contract_address = '0x2b5a4aE5490834a5F232fD00AE54BbF90425EF94'
 contract_address = '0xce247664E8D0715B0512B6242D1d96e0E3169Ceb'
 # Create contract instance
 contract = w3.eth.contract(address=contract_address, abi=contract_abi)
@@ -54,15 +54,33 @@ def get_latest_prompt():
 def get_latest_response():
     return contract.functions.getLatestResponse().call()
 
-result = summarize_investment(wallet_data)
-print(f"Transaction hash: {result.transactionHash.hex()}")
+def wait_for_response(max_attempts=60, delay=5):
+    print("Waiting for response...")
+    initial_prompt = get_latest_prompt()
+    for attempt in range(max_attempts):
+        time.sleep(delay)
+        current_prompt = get_latest_prompt()
+        current_response = get_latest_response()
+        if current_prompt != initial_prompt and current_response:
+            print("Response received:")
+            print(current_response)
+            return current_response
+        print(f"Attempt {attempt + 1}/{max_attempts}. Waiting {delay} seconds...")
+    print("No response received within the timeout period.")
+    return None
 
-# latest_prompt = get_latest_prompt()
-# latest_response = get_latest_response()
+def main():
+    print("Summarizing investment...")
+    result = summarize_investment(wallet_data)
+    print(f"Transaction hash: {result.transactionHash.hex()}")
 
-# print("--------------------------------")
-# print("Prompt:")
-# print(f"Latest prompt: {latest_prompt}")
-# print("--------------------------------")
-# print("Response:")
-# print(f"Latest response: {latest_response}")
+    response = wait_for_response()
+    if response:
+        print("--------------------------------")
+        print("Investment Summary:")
+        print(response)
+    else:
+        print("Failed to get investment summary. Please try again later.")
+
+if __name__ == "__main__":
+    main()
