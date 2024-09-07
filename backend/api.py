@@ -5,6 +5,14 @@ import json
 from sqlalchemy import create_engine
 from utils_dbforest import get_sqlalchemy_engine  # Assuming this is in your utils_dbforest.py
 from calculation import compute_market_caps_weights
+import os
+from dotenv import load_dotenv
+
+from wallet_data import get_wallet_data
+from ora_summary import summarize_investment, wait_for_response
+from ora_prompt import send_transaction
+
+load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -33,3 +41,14 @@ def compute_market_caps(request: MarketCapRequest):
         raise HTTPException(status_code=500, detail=f"Error computing market cap weights: {str(e)}")
 
     return json.loads(weights)  # Return the weights as JSON
+
+# Endpoint to compute market cap weights
+@app.post("/gen_wallet_summary/")
+def wallet_summary():
+    wallet_data = get_wallet_data(os.getenv('PUBLIC_KEY'), os.getenv('OP_MAINNET_URL_RPC'))
+    print("Summarizing investment...")
+    result = summarize_investment(wallet_data)
+    print(f"Transaction hash: {result.transactionHash.hex()}")
+
+    response = wait_for_response()
+    return response
