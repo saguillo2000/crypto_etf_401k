@@ -7,10 +7,11 @@ from utils_dbforest import get_sqlalchemy_engine  # Assuming this is in your uti
 from calculation import compute_market_caps_weights
 import os
 from dotenv import load_dotenv
+import time
 
 from wallet_data import get_wallet_data
 from ora_summary import summarize_investment, wait_for_response
-from ora_prompt import send_transaction
+from ora_prompt import calculate_ai_result, get_latest_prompt, get_latest_response
 
 load_dotenv()
 
@@ -52,3 +53,28 @@ def wallet_summary():
 
     response = wait_for_response()
     return response
+
+class PromptRequest(BaseModel):
+    prompt: str
+
+@app.post("/gen_prompt/")
+def gen_prompt(request: PromptRequest):
+    prompt = request.prompt
+
+    print("Sending prompt to AI Oracle...")
+    result = calculate_ai_result(prompt)
+    print(f"Transaction hash: {result.transactionHash.hex()}")
+
+    print("Waiting for response...")
+    for _ in range(30):  # Wait up to 30 seconds for a response
+        time.sleep(1)
+        latest_prompt = get_latest_prompt()
+        latest_response = get_latest_response()
+        if latest_prompt == prompt and latest_response:
+            print("Response received:")
+            print(latest_response)
+            break
+    else:
+        print("No response received within the timeout period.")
+
+    return latest_response
