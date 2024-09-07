@@ -45,12 +45,18 @@ contract WalletSummary is AIOracleCallbackReceiver {
     mapping(uint256 => string) public latestPrompts;
     mapping(uint256 => string) public latestResponses;
 
+    uint256 count = 0;
+
     function getLatestPrompt() external view returns (string memory) {
         return latestPrompts[modelId];
     }
 
     function getLatestResponse() external view returns (string memory) {
         return latestResponses[modelId];
+    }
+
+    function getCount() external view returns (uint256) {
+        return count;
     }
 
     function getAIResult(
@@ -72,6 +78,7 @@ contract WalletSummary is AIOracleCallbackReceiver {
         // Update latest prompt and response
         latestPrompts[request.modelId] = string(request.input);
         latestResponses[request.modelId] = string(output);
+        count++;
 
         emit promptsUpdated(
             requestId,

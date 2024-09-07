@@ -18,7 +18,7 @@ with open('ora_summary_abi.json', 'r') as f:
     contract_abi = json.load(f)
 
 # Contract address and ABI (you'll need to replace these)
-contract_address = '0xce247664E8D0715B0512B6242D1d96e0E3169Ceb' # ETH sepolia
+contract_address = '0xb1fD15bC6a6F72F179ECB982914888E05Dd0c040' # ETH sepolia
 #contract_address = '0x92410D28EAdD7fFe0e6cA8CD39d81f3022eC9141' # OP sepolia
 
 # Create contract instance
@@ -56,14 +56,18 @@ def get_latest_prompt():
 def get_latest_response():
     return contract.functions.getLatestResponse().call()
 
-def wait_for_response(max_attempts=60, delay=5):
+def get_latest_count():
+    return contract.functions.getCount().call()
+
+def wait_for_response(max_attempts=30, delay=1):
     print("Waiting for response...")
-    initial_prompt = get_latest_prompt()
+    initial_count = get_latest_count()
     for attempt in range(max_attempts):
         time.sleep(delay)
         current_prompt = get_latest_prompt()
         current_response = get_latest_response()
-        if current_prompt != initial_prompt and current_response:
+        current_count = get_latest_count()
+        if current_count != initial_count:
             print("Response received:")
             print(current_response)
             return current_response
