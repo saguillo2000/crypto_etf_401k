@@ -77,4 +77,4 @@ def gen_prompt(request: PromptRequest):
     else:
         print("No response received within the timeout period.")
 
-    return latest_response
+    return {"answer": latest_response}

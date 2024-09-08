@@ -69,19 +69,27 @@ const VerificationSuccess: React.FC = () => {
     if (chatInput.trim()) {
       const question = chatInput;
       setChatInput('');
-      // Simulate an API call to get the answer from an LLM
-      const answer = await getAnswerFromLLM(question);
-      setChatHistory([...chatHistory, { question, answer }]);
-    }
-  };
+      try {
+        const response = await fetch('http://127.0.0.1:8003/gen_prompt/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt: question }),
+        });
 
-  const getAnswerFromLLM = async (question: string): Promise<string> => {
-    // Simulate an API call to an LLM
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(`This is a simulated answer to the question: "${question}"`);
-      }, 1000);
-    });
+        if (!response.ok) {
+          throw new Error('Failed to fetch answer');
+        }
+
+        const data = await response.json();
+        const answer = data.answer; // Accessing the 'answer' field directly
+        console.log('API response answer:', answer); // Log the answer to the console
+        setChatHistory([...chatHistory, { question, answer }]);
+      } catch (error) {
+        console.error('Error fetching answer:', error);
+      }
+    }
   };
 
   const handleBuy = () => {

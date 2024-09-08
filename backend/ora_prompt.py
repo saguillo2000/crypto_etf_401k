@@ -32,7 +32,7 @@ def send_transaction(func, *args, **kwargs):
         **kwargs
     })
     signed_txn = account.sign_transaction(transaction)
-    tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
     return w3.eth.wait_for_transaction_receipt(tx_hash)
 
 def estimate_fee():
